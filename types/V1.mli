@@ -658,11 +658,19 @@ module type TCP = sig
   (** [create_connection t (addr,port)] will open a TCPv4 connection
       to the specified endpoint. *)
 
-  val input: t -> listeners:(int -> callback option) -> ipinput
-  (** [input t listeners] defines a mapping of threads that are
-      willing to accept new flows on a given port.  If the [callback]
-      returns [None], the input function will return an RST to refuse
-      connections on a port. *)
+  type action = [
+    | `Reject (* reject by sending a RST *)
+    | `Accept of callback
+  ]
+  (** Action to take for an incoming flow *)
+
+  type on_flow_arrival_callback = src:(ipaddr * int) -> dst:(ipaddr * int) -> action io
+  (** Callback called per incoming flow to decide what action to take *)
+
+  val input: t -> on_flow_arrival:on_flow_arrival_callback -> ipinput
+  (** [input t on_flow_arrival] creates an [ipinput] function which will
+      call [on_flow_arrival] for each new incoming flow to decide how to
+      handle it. *)
 end
 
 (** {1 TCP/IPv4 stack}
@@ -751,12 +759,18 @@ module type STACKV4 = sig
       Multiple bindings to the same port will overwrite previous
       bindings, so callbacks will not chain if ports clash. *)
 
-  val listen_tcpv4: t -> port:int -> TCPV4.callback -> unit
-  (** [listen_tcpv4 t ~port cb] will register the [cb] callback on the
-      TCPv4 [port] and immediatey return.  If [port] is invalid (not
-      between 0 and 65535 inclusive), it raises [Invalid_argument].
-      Multiple bindings to the same port will overwrite previous
-      bindings, so callbacks will not chain if ports clash. *)
+  type tcpv4_action = [
+    | `Reject (* reject by sending a RST *)
+    | `Accept of TCPV4.callback
+  ]
+  (** Action to take for an incoming TCPv4 flow *)
+
+  type tcpv4_on_flow_arrival_callback = src:(ipv4addr * int) -> dst:(ipv4addr * int) -> tcpv4_action io
+  (** Callback called per incoming flow to decide what action to take *)
+
+  val listen_tcpv4: t -> on_flow_arrival:tcpv4_on_flow_arrival_callback -> unit
+  (** [listen_tcpv4 t cb] registers [cb] as the callback which will be called
+      on every incoming flow to decide how to handle it. *)
 
   val listen: t -> unit io
   (** [listen t] will cause the stack to listen for traffic on the
