@@ -593,6 +593,11 @@ module type UDP = sig
   (** [write ~source_port ~dest_ip ~dest_port udp data] is a thread
       that writes [data] from an optional [source_port] to a [dest_ip]
       and [dest_port] IPv4 address pair. *)
+
+  val writev: ?source_ip:ipaddr -> ?source_port:int -> dest_ip:ipaddr -> dest_port:int -> t  -> buffer list -> unit io
+  (** [writev ?source_ip ?source_port ~dest_ip ~dest_port t bufs] is a thread
+      that writes [bufs] from an optional [source_ip] and [source_port] to a [dest_ip]
+      and [dest_port] IPv4 address pair. *)
 end
 
 (** {1 TCP stack}
