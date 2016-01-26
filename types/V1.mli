@@ -414,6 +414,12 @@ module type IP = sig
       packet going to [dst] for protocol [proto].  The space in [pkt] after the
       first [len] bytes can be used by the client. *)
 
+  val allocate: t -> src:ipaddr -> dst:ipaddr -> proto:[`ICMP | `TCP | `UDP] -> buffer * int
+  (** [allocate ~src ~dst ~proto] returns a pair of [(pkt, len)] such that
+      [Cstruct.sub pkt 0 len] is the IP header (including the link layer part) of a
+      packet going to [dst] for protocol [proto].  The space in [pkt] after the
+      first [len] bytes can be used by the client. *)
+
   val write: t -> buffer -> buffer -> unit io
   (** [write t frame buf] writes the packet [frame :: buf :: []] to
       the address [dst]. *)
