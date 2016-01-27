@@ -776,6 +776,13 @@ module type STACKV4 = sig
       Multiple bindings to the same port will overwrite previous
       bindings, so callbacks will not chain if ports clash. *)
 
+  val listen_tcpv4: t -> port:int -> TCPV4.callback -> unit
+  (** [listen_tcpv4 t ~port cb] will register the [cb] callback on the
+      TCPv4 [port] and immediatey return.  If [port] is invalid (not
+      between 0 and 65535 inclusive), it raises [Invalid_argument].
+      Multiple bindings to the same port will overwrite previous
+      bindings, so callbacks will not chain if ports clash. *)
+
   type tcpv4_action = [
     | `Reject (* reject by sending a RST *)
     | `Accept of TCPV4.callback
@@ -785,8 +792,8 @@ module type STACKV4 = sig
   type tcpv4_on_flow_arrival_callback = src:(ipv4addr * int) -> dst:(ipv4addr * int) -> tcpv4_action io
   (** Callback called per incoming flow to decide what action to take *)
 
-  val listen_tcpv4: t -> on_flow_arrival:tcpv4_on_flow_arrival_callback -> unit
-  (** [listen_tcpv4 t cb] registers [cb] as the callback which will be called
+  val listen_tcpv4_flow: t -> on_flow_arrival:tcpv4_on_flow_arrival_callback -> unit
+  (** [listen_tcpv4_flow t cb] registers [cb] as the callback which will be called
       on every incoming flow to decide how to handle it. *)
 
   val listen: t -> unit io
