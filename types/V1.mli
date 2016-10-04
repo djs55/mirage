@@ -450,11 +450,17 @@ module type IP = sig
       header and passes the result onto either the [tcp] or [udp]
       function, or the [default] function for unknown IP protocols. *)
 
-  val allocate_frame: t -> dst:ipaddr -> proto:[`ICMP | `TCP | `UDP] -> buffer * int
-  (** [allocate_frame t ~dst ~proto] returns a pair [(pkt, len)] such that
+  val allocate_frame: t -> ?src:ipaddr -> dst:ipaddr -> proto:[`ICMP | `TCP | `UDP] -> unit -> buffer * int
+  (** [allocate_frame t ?src ~dst ~proto ()] returns a pair [(pkt, len)] such that
       [Cstruct.sub pkt 0 len] is the IP header (including the link layer part) of a
-      packet going to [dst] for protocol [proto].  The space in [pkt] after the
-      first [len] bytes can be used by the client. *)
+      packet.
+
+      - The IP destination address is set to [dst].
+      - The IP protocol field is set according to [proto].
+      - If [src = None] then the IP source address is set to this node's address.
+      - If [src = Some address] then the IP source address is set to [address].
+
+      The space in [pkt] after the first [len] bytes can be used by the client. *)
 
   val write: t -> buffer -> buffer -> unit io
   (** [write t frame buf] writes the packet [frame :: buf :: []] to
