@@ -635,11 +635,15 @@ module type UDP = sig
       return a concrete handler or a [None], which results in the
       datagram being dropped. *)
 
-  val write: ?src_port:int -> dst:ipaddr -> dst_port:int -> t -> buffer -> unit io
-  (** [write ~src_port ~dst ~dst_port udp data] is a thread
-      that writes [data] from an optional [src_port] to a [dst]
-      and [dst_port] IPv4 address pair. *)
+  val write: ?src:ipaddr -> ?src_port:int -> dst:ipaddr -> dst_port:int -> t -> buffer -> unit io
+  (** [write ?src ?src_port ~dst ~dst_port udp data] sends the [data] in a
+      UDP datagram to [dst:dst_port].
 
+      - If [src = None] then the default source IP address will be used.
+      - If [src = Some address] then the source IP address will be set to [address].
+      - If [src_port = None] then the system will chose a source port.
+      - If [src_port = Some port] then the port [port] will be used.
+    *)
 end
 
 (** {1 TCP stack}
