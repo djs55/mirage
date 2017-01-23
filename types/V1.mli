@@ -356,6 +356,10 @@ module type ETHIF = sig
   val mac: t -> macaddr
   (** [mac nf] is the MAC address of [nf]. *)
 
+  val mtu: t -> int
+  (** [mtu nf] is the Maximum Transmission Unit of the [nf] i.e. the maximum
+      size of the payload, not including the ethernet frame header. *)
+
   val input: arpv4:(buffer -> unit io) -> ipv4:(buffer -> unit io) -> ipv6:(buffer -> unit io) -> t -> buffer -> unit io
   (** {b FIXME} [listen nf fn] is a blocking operation that calls [fn
       buf] with every packet that is read from the interface.  It
@@ -465,6 +469,11 @@ module type IP = sig
   (** Project a universal IP address into the version supported by the
       current implementation. Return [None] if there is a version
       mismatch. *)
+
+  val mtu: t -> int
+  (** [mtu nf] is the Maximum Transmission Unit of the [nf] i.e. the maximum
+      size of the payload, not including the ethernet frame header. *)
+
 
 end
 
